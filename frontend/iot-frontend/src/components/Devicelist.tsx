@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 function DeviceList() {
   const [devices, setDevices] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
+  const [error, setError] = useState<string | null>(null);
   useEffect(() => {
     const fetchDevices = async () => {
       try {
@@ -14,8 +13,14 @@ function DeviceList() {
         }
         const data = await response.json();
         setDevices(data.unique_devices);
-      } catch (e) {
-        setError(e.message);
+      } catch (e:unknown) {
+        if(e instanceof Error)
+        {
+
+            setError(e.message);
+        }else{
+            setError("unknown error has occurred");
+        }
       } finally {
         setLoading(false);
       }
