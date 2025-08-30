@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
-
-function DeviceList() {
+interface Props{
+    set_mac_addr:(mac:string)=>void,
+}
+function DeviceList({set_mac_addr}:Props) {
   const [devices, setDevices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -50,7 +52,7 @@ function DeviceList() {
             // <li key={index}>{mac} <button>Get Details</button></li>
             <tr>
                 <td key={index}>{mac}</td>
-                <td> <button>Get Analytics</button></td>
+                <td> <button onClick={()=>{set_mac_addr(mac)}}>Get Analytics</button></td>
             </tr>
           ))
         ) : (
