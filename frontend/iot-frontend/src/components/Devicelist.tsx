@@ -40,14 +40,27 @@ function DeviceList() {
   return (
     <div>
       <h1>Unique Devices</h1>
-      <ul>
-        {devices.length > 0 ? (
+      <table>
+        <th>
+            <td>Name</td>
+            <td>Action</td>
+        </th>
+            {devices.length > 0 ? (
           devices.map((mac, index) => (
-            <li key={index}>{mac}</li>
+            // <li key={index}>{mac} <button>Get Details</button></li>
+            <tr>
+                <td key={index}>{mac}</td>
+                <td> <button>Get Analytics</button></td>
+            </tr>
           ))
         ) : (
-          <li>No devices found.</li>
+            <tr>
+                <td>No devices found.</td>
+            </tr>
         )}
+      </table>
+      <ul>
+        
       </ul>
     </div>
   );
