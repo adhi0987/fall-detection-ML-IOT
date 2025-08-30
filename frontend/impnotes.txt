@@ -7,3 +7,9 @@ npm run dev // for local developement
 npm run build  // before deploying in render must ru this command
 npm install && npm run dev  // start command for render
 publishing directory : dist 
+
+interface props{   // basically we define the structure of props datatype 
+macaddr : string,
+setMacAddr : ()=>void // this is for function which take 0 arguments
+setMacAddr : (mac:string)=>void // this is function which take 1 string arguments
+}
