@@ -5,9 +5,11 @@ import pickle
 import numpy as np
 import pandas as pd
 from sqlalchemy.orm import Session
+from sqlalchemy import distinct
 import models
 import database # Import your new files
-
+from models import Base,FallDetection
+from typing import List
 # Initialize FastAPI app
 app = FastAPI(
     title="SVM Fall Detection API",
@@ -132,3 +134,35 @@ async def predict_fall(data: PredictionInput, db: Session = Depends(get_db)):
         return {"prediction": int(prediction[0]), "prediction_label": prediction_label, "record_id": db_fall_detection.id}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Prediction or database operation failed: {e}")
+    
+# Define an endpoint to get all unique MAC addresses
+@app.get("/getdevices")
+def get_unique_devices(db: Session = Depends(get_db)):
+    try:
+        # Query the database for a list of unique mac_addr values
+        unique_macs = db.query(distinct(FallDetection.mac_addr)).all()
+
+        # The query returns a list of tuples, so we need to flatten it
+        # to get a simple list of strings.
+        mac_address_list = [mac[0] for mac in unique_macs]
+        
+        return {"unique_devices": mac_address_list}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to retrieve devices: {e}")
+    
+# Define a new endpoint to get data points for a specific MAC address
+@app.get("/getdatapoints/{mac_address}")
+def get_data_for_device(mac_address: str, db: Session = Depends(get_db)):
+    try:
+        # Query the database for records with a matching mac_addr
+        records = db.query(FallDetection).filter(FallDetection.mac_addr == mac_address).all()
+
+        if not records:
+            raise HTTPException(status_code=404, detail=f"No records found for MAC address: {mac_address}")
+        
+        return records
+    except Exception as e:
+        # Re-raise the HTTPException if it was already raised
+        if isinstance(e, HTTPException):
+            raise e
+        raise HTTPException(status_code=500, detail=f"Failed to retrieve data for device: {e}")
