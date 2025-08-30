@@ -1,11 +1,15 @@
-import { useEffect, useState } from 'react';
-interface Props{
-    set_mac_addr:(mac:string)=>void,
+import { useEffect, useState } from "react";
+
+interface DeviceListProps {
+  set_mac_addr: (mac: string) => void;
+  selectedMac: string | null;
 }
-function DeviceList({set_mac_addr}:Props) {
-  const [devices, setDevices] = useState([]);
+
+const DeviceList: React.FC<DeviceListProps> = ({ set_mac_addr, selectedMac }) => {
+  const [devices, setDevices] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
   useEffect(() => {
     const fetchDevices = async () => {
       try {
@@ -15,13 +19,14 @@ function DeviceList({set_mac_addr}:Props) {
         }
         const data = await response.json();
         setDevices(data.unique_devices);
-      } catch (e:unknown) {
-        if(e instanceof Error)
-        {
-
-            setError(e.message);
-        }else{
-            setError("unknown error has occurred");
+        if (data.unique_devices.length > 0) {
+          set_mac_addr(data.unique_devices[0]);
+        }
+      } catch (e: unknown) {
+        if (e instanceof Error) {
+          setError(e.message);
+        } else {
+          setError("An unknown error occurred.");
         }
       } finally {
         setLoading(false);
@@ -29,43 +34,54 @@ function DeviceList({set_mac_addr}:Props) {
     };
 
     fetchDevices();
-  }, []); // The empty array ensures this effect runs only once on component mount
+  }, [set_mac_addr]);
 
   if (loading) {
-    return <div>Loading devices...</div>;
+    return <div className="text-center py-4">Loading devices...</div>;
   }
 
   if (error) {
-    return <div>Error: {error}</div>;
+    return <div className="text-center py-4 text-red-500">Error: {error}</div>;
   }
 
   return (
-    <div>
-      <h1>Unique Devices</h1>
-      <table>
-        <th>
-            <td>Name</td>
-            <td>Action</td>
-        </th>
+    <div className="bg-white rounded-lg shadow-md p-6">
+      <h2 className="text-xl font-semibold mb-4">Unique Devices</h2>
+      <div className="overflow-x-auto">
+        <table className="w-full text-left table-auto">
+          <thead className="bg-gray-200">
+            <tr>
+              <th className="p-3">MAC Address</th>
+              <th className="p-3">Action</th>
+            </tr>
+          </thead>
+          <tbody>
             {devices.length > 0 ? (
-          devices.map((mac, index) => (
-            // <li key={index}>{mac} <button>Get Details</button></li>
-            <tr>
-                <td key={index}>{mac}</td>
-                <td> <button onClick={()=>{set_mac_addr(mac)}}>Get Analytics</button></td>
-            </tr>
-          ))
-        ) : (
-            <tr>
-                <td>No devices found.</td>
-            </tr>
-        )}
-      </table>
-      <ul>
-        
-      </ul>
+              devices.map((mac) => (
+                <tr
+                  key={mac}
+                  className={`border-b hover:bg-gray-100 ${selectedMac === mac ? 'bg-blue-100' : ''}`}
+                >
+                  <td className="p-3 font-mono">{mac}</td>
+                  <td className="p-3">
+                    <button
+                      onClick={() => set_mac_addr(mac)}
+                      className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+                    >
+                      View Analytics
+                    </button>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={2} className="p-3 text-center text-gray-500">No devices found.</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
-}
-
+};
 export default DeviceList;
