@@ -1,0 +1,9 @@
+used render static files service for deployement 
+npm create vite@5.0.0
+project name : iot-frontend
+cd iot-frontend
+npm install 
+npm run dev // for local developement
+npm run build  // before deploying in render must ru this command
+npm install && npm run dev  // start command for render
+publishing directory : dist 
