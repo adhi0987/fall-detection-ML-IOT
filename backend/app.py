@@ -1,11 +1,13 @@
-from fastapi import FastAPI
+import os
+from fastapi import FastAPI, Depends, HTTPException
 from pydantic import BaseModel
 import pickle
 import numpy as np
-import pandas as pd # Used for creating DataFrame to handle feature names for scaler
-import uvicorn # To run the FastAPI app
-import sklearn
-print(sklearn.__version__)
+import pandas as pd
+from sqlalchemy.orm import Session
+import models
+import database # Import your new files
+
 # Initialize FastAPI app
 app = FastAPI(
     title="SVM Fall Detection API",
@@ -21,15 +23,25 @@ try:
     print("Model and scaler loaded successfully.")
 except FileNotFoundError:
     print("Error: Model or scaler file not found. Please ensure 'svm_model.pkl' and 'scaler.pkl' are in the same directory.")
-    model = None # Set to None to indicate loading failure
+    model = None
     scaler = None
 except Exception as e:
     print(f"Error loading model or scaler: {e}")
     model = None
     scaler = None
 
+# Create database tables on startup
+@app.on_event("startup")
+def on_startup():
+    try:
+        models.Base.metadata.create_all(bind=database.engine)
+        print("Database tables created successfully.")
+    except Exception as e:
+        print(f"Error creating database tables: {e}")
+
 # Define the input data structure for prediction using Pydantic
 class PredictionInput(BaseModel):
+    mac_addr: str
     max_Ax: float
     min_Ax: float
     var_Ax: float
@@ -47,6 +59,14 @@ class PredictionInput(BaseModel):
     var_pitch: float
     mean_pitch: float
 
+# Dependency to get a database session
+def get_db():
+    db = database.SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
 # Define a root endpoint for basic testing
 @app.get("/")
 async def read_root():
@@ -54,13 +74,12 @@ async def read_root():
 
 # Define the prediction endpoint
 @app.post("/predict/")
-async def predict_fall(data: PredictionInput):
+async def predict_fall(data: PredictionInput, db: Session = Depends(get_db)):
     if model is None or scaler is None:
-        return {"error": "Model or scaler not loaded. Please check server logs."}
+        raise HTTPException(status_code=500, detail="Model or scaler not loaded. Please check server logs.")
 
     try:
         # Convert input data to a pandas DataFrame for consistent scaling
-        # Ensure the order of features matches the training order
         features = [
             data.max_Ax, data.min_Ax, data.var_Ax, data.mean_Ax,
             data.max_Ay, data.min_Ay, data.var_Ay, data.mean_Ay,
@@ -80,18 +99,36 @@ async def predict_fall(data: PredictionInput):
 
         # Make prediction
         prediction = model.predict(scaled_data)
-
-        # The model predicts either 0 or 1.
-        # Assuming 1 indicates a 'fall' and 0 indicates 'no fall'.
         prediction_label = "Fall" if prediction[0] == 1 else "No Fall"
 
-        return {"prediction": int(prediction[0]), "prediction_label": prediction_label}
-    except Exception as e:
-        return {"error": f"Prediction failed: {e}"}
+        # Create a new database record
+        db_fall_detection = models.FallDetection(
+            mac_addr=data.mac_addr,
+            max_Ax=data.max_Ax,
+            min_Ax=data.min_Ax,
+            var_Ax=data.var_Ax,
+            mean_Ax=data.mean_Ax,
+            max_Ay=data.max_Ay,
+            min_Ay=data.min_Ay,
+            var_Ay=data.var_Ay,
+            mean_Ay=data.mean_Ay,
+            max_Az=data.max_Az,
+            min_Az=data.min_Az,
+            var_Az=data.var_Az,
+            mean_Az=data.mean_Az,
+            max_pitch=data.max_pitch,
+            min_pitch=data.min_pitch,
+            var_pitch=data.var_pitch,
+            mean_pitch=data.mean_pitch,
+            prediction=int(prediction[0]),
+            prediction_label=prediction_label
+        )
 
-# To run this API:
-# 1. Save this code as a Python file (e.g., `app.py`).
-# 2. Make sure `svm_model.pkl` and `scaler.pkl` are in the same directory.
-# 3. Install necessary libraries: `pip install fastapi uvicorn pandas scikit-learn`
-# 4. Run from your terminal: `uvicorn app:app --reload`
-# 5. Access the API documentation at `http://127.0.0.1:8000/docs` or `http://127.0.0.1:8000/redoc`
+        # Add the record to the session and commit
+        db.add(db_fall_detection)
+        db.commit()
+        db.refresh(db_fall_detection)
+
+        return {"prediction": int(prediction[0]), "prediction_label": prediction_label, "record_id": db_fall_detection.id}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Prediction or database operation failed: {e}")
