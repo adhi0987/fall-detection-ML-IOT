@@ -1,2 +1,12 @@
 pip freeze> requirements.txt # important during deployement
 uvicorn app:app --host 0.0.0.0 --port 10000 #start command to write in the render 
+origins = ["http://localhost:5173", "https://fall-ml-iot-interface.onrender.com"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+// it is mandatory to add these to access the end points on different front end frameworks CORS cross origin resoure sharing 
