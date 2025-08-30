@@ -6,14 +6,26 @@ import numpy as np
 import pandas as pd
 from sqlalchemy.orm import Session
 from sqlalchemy import distinct
-import models
-import database # Import your new files
-from models import Base,FallDetection
 from typing import List
+from fastapi.middleware.cors import CORSMiddleware
+import database
+import models
+from models import FallDetection, Base
+
 # Initialize FastAPI app
 app = FastAPI(
     title="SVM Fall Detection API",
     description="API for predicting fall events using a pre-trained SVM model."
+)
+
+origins = ["http://localhost:5173", "https://fall-ml-iot-interface.onrender.com"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Load the trained model and scaler
@@ -79,9 +91,7 @@ async def read_root():
 async def predict_fall(data: PredictionInput, db: Session = Depends(get_db)):
     if model is None or scaler is None:
         raise HTTPException(status_code=500, detail="Model or scaler not loaded. Please check server logs.")
-
     try:
-        # Convert input data to a pandas DataFrame for consistent scaling
         features = [
             data.max_Ax, data.min_Ax, data.var_Ax, data.mean_Ax,
             data.max_Ay, data.min_Ay, data.var_Ay, data.mean_Ay,
@@ -95,15 +105,10 @@ async def predict_fall(data: PredictionInput, db: Session = Depends(get_db)):
             'max_pitch', 'min_pitch', 'var_pitch', 'mean_pitch'
         ]
         input_df = pd.DataFrame([features], columns=feature_names)
-
-        # Scale the input data
         scaled_data = scaler.transform(input_df)
-
-        # Make prediction
         prediction = model.predict(scaled_data)
         prediction_label = "Fall" if prediction[0] == 1 else "No Fall"
 
-        # Create a new database record
         db_fall_detection = models.FallDetection(
             mac_addr=data.mac_addr,
             max_Ax=data.max_Ax,
@@ -125,8 +130,6 @@ async def predict_fall(data: PredictionInput, db: Session = Depends(get_db)):
             prediction=int(prediction[0]),
             prediction_label=prediction_label
         )
-
-        # Add the record to the session and commit
         db.add(db_fall_detection)
         db.commit()
         db.refresh(db_fall_detection)
@@ -139,13 +142,8 @@ async def predict_fall(data: PredictionInput, db: Session = Depends(get_db)):
 @app.get("/getdevices")
 def get_unique_devices(db: Session = Depends(get_db)):
     try:
-        # Query the database for a list of unique mac_addr values
         unique_macs = db.query(distinct(FallDetection.mac_addr)).all()
-
-        # The query returns a list of tuples, so we need to flatten it
-        # to get a simple list of strings.
         mac_address_list = [mac[0] for mac in unique_macs]
-        
         return {"unique_devices": mac_address_list}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to retrieve devices: {e}")
@@ -154,15 +152,11 @@ def get_unique_devices(db: Session = Depends(get_db)):
 @app.get("/getdatapoints/{mac_address}")
 def get_data_for_device(mac_address: str, db: Session = Depends(get_db)):
     try:
-        # Query the database for records with a matching mac_addr
         records = db.query(FallDetection).filter(FallDetection.mac_addr == mac_address).all()
-
         if not records:
             raise HTTPException(status_code=404, detail=f"No records found for MAC address: {mac_address}")
-        
         return records
     except Exception as e:
-        # Re-raise the HTTPException if it was already raised
         if isinstance(e, HTTPException):
             raise e
         raise HTTPException(status_code=500, detail=f"Failed to retrieve data for device: {e}")
