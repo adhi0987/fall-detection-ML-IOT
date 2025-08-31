@@ -7,7 +7,6 @@ const Navbar = () => (
         Fall Detection Dashboard
       </div>
       <div className="navbar-links">
-        {/* Navigation links can be added here */}
       </div>
     </div>
   </nav>
