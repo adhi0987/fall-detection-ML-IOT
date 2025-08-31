@@ -106,6 +106,7 @@ async def predict_fall(data: PredictionInput, db: Session = Depends(get_db)):
         ]
         input_df = pd.DataFrame([features], columns=feature_names)
         scaled_data = scaler.transform(input_df)
+        print(input_df,"\n changed to :",scaled_data)
         prediction = model.predict(scaled_data)
         prediction_label = "Fall" if prediction[0] == 1 else "No Fall"
 
