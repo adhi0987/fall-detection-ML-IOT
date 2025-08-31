@@ -242,7 +242,8 @@ const Analytics: React.FC<AnalyticsProps> = ({ macid }) => {
   };
 
   const predictionOptions = {
-    responsive: true,
+   responsive: true, 
+   
     plugins: {
       legend: { position: 'top' as const },
       title: { display: true, text: 'Fall Prediction Events' },

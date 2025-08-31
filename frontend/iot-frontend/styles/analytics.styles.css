@@ -5,6 +5,7 @@
   padding: 2rem;
   box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
   margin-top: 2rem;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 /* Header */
@@ -22,6 +23,8 @@
   padding: 1rem;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   transition: box-shadow 0.3s ease;
+  display: flex;
+  flex-direction: column;
 }
 
 .chart-card:hover {
@@ -35,6 +38,51 @@
   color: #374151; /* gray-700 */
 }
 
+/* Chart Container */
+.chart-container {
+  position: relative;
+  flex-grow: 1;
+}
+
+/* Legend Styling */
+.chart-legend {
+  display: flex;
+  gap: 1.5rem;
+  margin-top: 0.75rem;
+  font-size: 0.875rem;
+  color: #4b5563; /* gray-600 */
+}
+
+.chart-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.legend-color-box {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  border: 1px solid #ddd;
+}
+
+/* Specific colors for legend */
+.legend-max-x {
+  background-color: #fb7185; /* rose-400 */
+  border-color: #fca5a5;
+}
+
+.legend-min-x {
+  background-color: #60a5fa; /* blue-400 */
+  border-color: #93c5fd;
+}
+
+.legend-mean-x {
+  background-color: #5eead4; /* teal-300 */
+  border-color: #67e8f9;
+}
+
 /* Full width and center Fall Prediction Chart */
 .full-width-chart {
   width: 100vw; /* Full viewport width */
@@ -45,7 +93,6 @@
   padding: 0 1rem; /* Optional padding so chart doesn't stick to edges */
 }
 
-/* Adjust the chart card inside this container */
 .full-width-chart .chart-card {
   width: 100%; /* Make sure chart-card uses full width */
   max-width: 1200px; /* Optional max width for large screens */
@@ -73,6 +120,7 @@
   border-collapse: collapse;
   font-size: 0.875rem;
   color: #374151; /* gray-700 */
+  box-shadow: 0 0 10px rgba(0,0,0,0.05);
 }
 
 .data-table thead {
@@ -84,6 +132,8 @@
   padding: 0.75rem 1rem;
   border-bottom: 1px solid #d1d5db;
   text-align: left;
+  /* word-break: break-word;  */
+  /*allow wrapping long content */
 }
 
 .data-table th {
@@ -106,4 +156,78 @@
   border-radius: 12px;
   box-shadow: inset 0 0 8px rgba(0,0,0,0.05);
   margin-top: 1rem;
+}
+
+/* Axis Labels */
+.axis-label {
+  font-size: 0.85rem;
+  fill: #6b7280; /* gray-500 */
+  font-weight: 500;
+}
+
+/* Tooltip Styling */
+.tooltip {
+  position: absolute;
+  padding: 0.5rem 0.75rem;
+  background: rgba(31, 41, 55, 0.85); /* dark gray with opacity */
+  color: #fff;
+  font-size: 0.75rem;
+  border-radius: 6px;
+  pointer-events: none;
+  transition: opacity 0.2s ease-in-out;
+  opacity: 0;
+  z-index: 20;
+}
+
+/* Typography enhancements */
+p, span {
+  color: #4b5563; /* gray-600 */
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+strong {
+  color: #111827;
+}
+
+/* Responsive tweaks */
+@media (max-width: 768px) {
+  .analytics-container {
+    padding: 1rem;
+    margin-top: 1rem;
+  }
+
+  .analytics-container h2 {
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+  }
+
+  .chart-card {
+    padding: 0.75rem;
+  }
+
+  .chart-card h3 {
+    font-size: 1rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .data-table th,
+  .data-table td {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.75rem;
+  }
+
+  /* Make full-width chart container padding smaller */
+  .full-width-chart {
+    padding: 0 0.5rem;
+    margin: 1rem auto;
+  }
+}
+
+/* Optional: very small screens - stack charts vertically with spacing */
+@media (max-width: 480px) {
+  .charts-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
 }

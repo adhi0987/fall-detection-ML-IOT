@@ -21,6 +21,7 @@
   border-collapse: collapse;
   font-size: 1rem;
   color: #374151; /* gray-700 */
+  table-layout: auto;
 }
 
 .device-table thead {
@@ -33,6 +34,7 @@
   padding: 0.75rem 1rem;
   border-bottom: 1px solid #d1d5db;
   vertical-align: middle;
+  word-break: break-word; /* allow breaking long MAC addresses */
 }
 
 .device-table th {
@@ -60,6 +62,8 @@
   border: none;
   outline: none;
   transition: background-color 0.3s ease;
+  white-space: nowrap;
+  min-width: 120px;
 }
 
 .btn-view:hover {
@@ -73,3 +77,76 @@
   border-radius: 12px;
   box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.05);
 }
+
+/* Responsive tweaks */
+@media (max-width: 768px) {
+  .device-list-wrapper {
+    padding: 1rem;
+  }
+
+  .device-list-wrapper h2 {
+    font-size: 1.25rem;
+    margin-top: 0.5rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .device-table th,
+  .device-table td {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+  }
+
+  .btn-view {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.875rem;
+    min-width: 100px;
+  }
+}
+
+/* Optional: very small screens - stack rows as cards */
+/* Uncomment if you want this behavior */
+/*
+@media (max-width: 480px) {
+  .device-table thead {
+    display: none;
+  }
+
+  .device-table,
+  .device-table tbody,
+  .device-table tr,
+  .device-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .device-table tr {
+    margin-bottom: 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    padding: 0.75rem;
+  }
+
+  .device-table td {
+    text-align: right;
+    padding-left: 50%;
+    position: relative;
+    border: none;
+    border-bottom: 1px solid #eee;
+  }
+
+  .device-table td::before {
+    content: attr(data-label);
+    position: absolute;
+    left: 1rem;
+    width: 45%;
+    padding-left: 0.5rem;
+    font-weight: 600;
+    text-align: left;
+    color: #111827;
+  }
+
+  .device-table td:last-child {
+    border-bottom: 0;
+  }
+}
+*/
