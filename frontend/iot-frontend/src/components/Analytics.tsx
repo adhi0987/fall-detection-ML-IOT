@@ -60,25 +60,31 @@ const Analytics: React.FC<AnalyticsProps> = ({ macid }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!macid) return;
+useEffect(() => {
+  if (!macid) return;
 
-    const fetchDataPoints = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const response = await fetch(`https://fall-prediction-api.onrender.com/getdatapoints/${macid}`);
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        const data = await response.json();
-        setDataPoints(data);
-      } catch (e: unknown) {
-        setError(e instanceof Error ? e.message : "An unknown error occurred.");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchDataPoints();
-  }, [macid]);
+  let intervalId: ReturnType<typeof setInterval>;
+
+  const fetchDataPoints = async () => {
+    try {
+      const response = await fetch(`https://fall-prediction-api.onrender.com/getdatapoints/${macid}`);
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      const data = await response.json();
+      setDataPoints(data);
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : "An unknown error occurred.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  setLoading(true);
+  fetchDataPoints(); // initial load
+  intervalId = setInterval(fetchDataPoints, 5000); // refresh every 5s
+
+  return () => clearInterval(intervalId); // cleanup
+}, [macid]);
+
 
   if (!macid) {
     return <div className="text-center p-8 text-gray-500">Select a device from the list to view its analytics.</div>;
