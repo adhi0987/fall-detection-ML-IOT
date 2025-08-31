@@ -1,0 +1,75 @@
+/* Wrapper */
+.device-list-wrapper {
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Header */
+.device-list-wrapper h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  margin-top: 1rem;
+  color: #1f2937; /* gray-800 */
+}
+
+/* Table */
+.device-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 1rem;
+  color: #374151; /* gray-700 */
+}
+
+.device-table thead {
+  background-color: #f3f4f6; /* gray-100 */
+}
+
+.device-table th,
+.device-table td {
+  text-align: left;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #d1d5db;
+  vertical-align: middle;
+}
+
+.device-table th {
+  font-weight: 600;
+  color: #111827; /* gray-900 */
+}
+
+/* Hover and selected row */
+.device-table tbody tr:hover {
+  background-color: #e0f2fe; /* light blue */
+  cursor: pointer;
+}
+.device-table tbody tr.selected,
+.device-table tbody tr.selected:hover {
+  background-color: #bae6fd; /* blue-300 */
+}
+
+/* Button */
+.btn-view {
+  background-color: #3b82f6; /* blue-500 */
+  color: white;
+  padding: 0.5rem 1.25rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  border: none;
+  outline: none;
+  transition: background-color 0.3s ease;
+}
+
+.btn-view:hover {
+  background-color: #2563eb; /* blue-600 */
+  cursor: pointer;
+}
+
+/* Responsive container */
+.device-table-container {
+  overflow-x: auto;
+  border-radius: 12px;
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.05);
+}

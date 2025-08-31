@@ -1,4 +1,37 @@
-.navbar{
-    background-color: #2c6c22;
-    color: #fffdef;
+/* Navbar container */
+.navbar {
+  background: linear-gradient(90deg, #2563eb, #3b82f6); /* blue gradient */
+  padding: 1rem 2rem;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+  font-family: 'Inter', sans-serif;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Brand name */
+.navbar-brand {
+  color: white;
+  font-weight: 900;
+  font-size: 1.75rem;
+  letter-spacing: 1.5px;
+  user-select: none;
+}
+
+/* For any additional nav items */
+.navbar-links {
+  display: flex;
+  gap: 1.5rem;
+}
+
+/* Responsive: hide links on small */
+@media (max-width: 768px) {
+  .navbar-links {
+    display: none;
+  }
 }

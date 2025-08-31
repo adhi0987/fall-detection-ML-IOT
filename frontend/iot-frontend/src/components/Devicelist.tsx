@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import "../../styles/devicelist.styles.css";
 
 interface DeviceListProps {
   set_mac_addr: (mac: string) => void;
@@ -45,14 +46,14 @@ const DeviceList: React.FC<DeviceListProps> = ({ set_mac_addr, selectedMac }) =>
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
-      <h2 className="text-xl font-semibold mb-4">Unique Devices</h2>
-      <div className="overflow-x-auto">
-        <table className="w-full text-left table-auto">
-          <thead className="bg-gray-200">
+    <div className="device-list-wrapper">
+      <h2>Unique Devices</h2>
+      <div className="device-table-container">
+        <table className="device-table">
+          <thead>
             <tr>
-              <th className="p-3">MAC Address</th>
-              <th className="p-3">Action</th>
+              <th>MAC Address</th>
+              <th>Action</th>
             </tr>
           </thead>
           <tbody>
@@ -60,13 +61,13 @@ const DeviceList: React.FC<DeviceListProps> = ({ set_mac_addr, selectedMac }) =>
               devices.map((mac) => (
                 <tr
                   key={mac}
-                  className={`border-b hover:bg-gray-100 ${selectedMac === mac ? 'bg-blue-100' : ''}`}
+                  className={selectedMac === mac ? 'selected' : ''}
                 >
-                  <td className="p-3 font-mono">{mac}</td>
-                  <td className="p-3">
+                  <td className="font-mono">{mac}</td>
+                  <td>
                     <button
                       onClick={() => set_mac_addr(mac)}
-                      className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+                      className="btn-view"
                     >
                       View Analytics
                     </button>
@@ -75,7 +76,9 @@ const DeviceList: React.FC<DeviceListProps> = ({ set_mac_addr, selectedMac }) =>
               ))
             ) : (
               <tr>
-                <td colSpan={2} className="p-3 text-center text-gray-500">No devices found.</td>
+                <td colSpan={2} style={{ textAlign: "center", color: "#6b7280", padding: "0.75rem 1rem" }}>
+                  No devices found.
+                </td>
               </tr>
             )}
           </tbody>
@@ -84,4 +87,5 @@ const DeviceList: React.FC<DeviceListProps> = ({ set_mac_addr, selectedMac }) =>
     </div>
   );
 };
+
 export default DeviceList;

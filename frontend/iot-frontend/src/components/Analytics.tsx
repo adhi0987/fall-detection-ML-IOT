@@ -12,6 +12,7 @@ import {
   BarElement,
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
+import "../../styles/analytics.styles.css";
 
 // Register Chart.js components
 ChartJS.register(
@@ -91,10 +92,24 @@ const Analytics: React.FC<AnalyticsProps> = ({ macid }) => {
     return <div className="text-center p-8 text-red-500">Error: {error}</div>;
   }
 
-  // ✅ Ensure prediction values are numeric
+  // Prediction and accelerometer chart data preparation
   const labels = dataPoints.map((data) => new Date(data.timestamp).toLocaleString());
   const predictionData = dataPoints.map((data) => Number(data.prediction));
   const maxAxData = dataPoints.map((data) => data.max_Ax);
+  const minAxData = dataPoints.map((data) => data.min_Ax);
+  const meanAxData = dataPoints.map((data) => data.mean_Ax);
+
+  const maxAyData = dataPoints.map((data) => data.max_Ay);
+  const minAyData = dataPoints.map((data) => data.min_Ay);
+  const meanAyData = dataPoints.map((data) => data.mean_Ay);
+
+  const maxAzData = dataPoints.map((data) => data.max_Az);
+  const minAzData = dataPoints.map((data) => data.min_Az);
+  const meanAzData = dataPoints.map((data) => data.mean_Az);
+
+  const maxPData = dataPoints.map((data) => data.max_pitch);
+  const minPData = dataPoints.map((data) => data.min_pitch);
+  const meanPData = dataPoints.map((data) => data.mean_pitch);
 
   const predictionChartData = {
     labels,
@@ -111,14 +126,14 @@ const Analytics: React.FC<AnalyticsProps> = ({ macid }) => {
           return value === 1 ? 'rgb(255, 99, 132)' : 'rgb(53, 162, 235)';
         },
         borderWidth: 1,
-        showLine: false,   // ✅ show only points, no connecting line
-        pointRadius: 6,    // ✅ makes points visible
+        showLine: false,   // Show only points, no connecting line
+        pointRadius: 6,    // Makes points visible
         pointHoverRadius: 8,
       },
     ],
   };
 
-  const accelerometerChartData = {
+  const accelerometerChartDataX = {
     labels,
     datasets: [
       {
@@ -130,14 +145,95 @@ const Analytics: React.FC<AnalyticsProps> = ({ macid }) => {
       },
       {
         label: 'Min X-axis Acceleration',
-        data: dataPoints.map((data) => data.min_Ax),
+        data: minAxData,
         borderColor: 'rgb(53, 162, 235)',
         backgroundColor: 'rgba(53, 162, 235, 0.5)',
         tension: 0.5,
       },
       {
         label: 'Mean X-axis Acceleration',
-        data: dataPoints.map((data) => data.mean_Ax),
+        data: meanAxData,
+        borderColor: 'rgb(75, 192, 192)',
+        backgroundColor: 'rgba(75, 192, 192, 0.5)',
+        tension: 0.5,
+      },
+    ],
+  };
+
+  const accelerometerChartDataY = {
+    labels,
+    datasets: [
+      {
+        label: 'Max Y-axis Acceleration',
+        data: maxAyData,
+        borderColor: 'rgb(255, 99, 132)',
+        backgroundColor: 'rgba(255, 99, 132, 0.5)',
+        tension: 0.5,
+      },
+      {
+        label: 'Min Y-axis Acceleration',
+        data: minAyData,
+        borderColor: 'rgb(53, 162, 235)',
+        backgroundColor: 'rgba(53, 162, 235, 0.5)',
+        tension: 0.5,
+      },
+      {
+        label: 'Mean Y-axis Acceleration',
+        data: meanAyData,
+        borderColor: 'rgb(75, 192, 192)',
+        backgroundColor: 'rgba(75, 192, 192, 0.5)',
+        tension: 0.5,
+      },
+    ],
+  };
+
+  const accelerometerChartDataZ = {
+    labels,
+    datasets: [
+      {
+        label: 'Max Z-axis Acceleration',
+        data: maxAzData,
+        borderColor: 'rgb(255, 99, 132)',
+        backgroundColor: 'rgba(255, 99, 132, 0.5)',
+        tension: 0.5,
+      },
+      {
+        label: 'Min Z-axis Acceleration',
+        data: minAzData,
+        borderColor: 'rgb(53, 162, 235)',
+        backgroundColor: 'rgba(53, 162, 235, 0.5)',
+        tension: 0.5,
+      },
+      {
+        label: 'Mean Z-axis Acceleration',
+        data: meanAzData,
+        borderColor: 'rgb(75, 192, 192)',
+        backgroundColor: 'rgba(75, 192, 192, 0.5)',
+        tension: 0.5,
+      },
+    ],
+  };
+
+  const accelerometerChartDataP = {
+    labels,
+    datasets: [
+      {
+        label: 'Max Pitch Acceleration',
+        data: maxPData,
+        borderColor: 'rgb(255, 99, 132)',
+        backgroundColor: 'rgba(255, 99, 132, 0.5)',
+        tension: 0.5,
+      },
+      {
+        label: 'Min Pitch Acceleration',
+        data: minPData,
+        borderColor: 'rgb(53, 162, 235)',
+        backgroundColor: 'rgba(53, 162, 235, 0.5)',
+        tension: 0.5,
+      },
+      {
+        label: 'Mean Pitch Acceleration',
+        data: meanPData,
         borderColor: 'rgb(75, 192, 192)',
         backgroundColor: 'rgba(75, 192, 192, 0.5)',
         tension: 0.5,
@@ -151,10 +247,11 @@ const Analytics: React.FC<AnalyticsProps> = ({ macid }) => {
       legend: { position: 'top' as const },
       title: { display: true, text: 'Fall Prediction Events' },
     },
+    // Uncomment if y-axis ticks and labels needed
     // scales: {
     //   y: {
     //     ticks: {
-    //       callback: (value: number) => (value === 1 ? 'Fall' : 'No Fall'), // ✅ map 0/1 → label
+    //       callback: (value: number) => (value === 1 ? 'Fall' : 'No Fall'),
     //     },
     //     min: 0,
     //     max: 1,
@@ -178,26 +275,39 @@ const Analytics: React.FC<AnalyticsProps> = ({ macid }) => {
   };
 
   return (
-    <div className="p-8 bg-white rounded-lg shadow-md mt-8">
-      <h2 className="text-xl font-semibold mb-4">Analytics for MAC: {macid}</h2>
+    <div className="analytics-container">
+      <h2>Analytics for MAC: {macid}</h2>
 
       {dataPoints.length > 0 ? (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-            <div className="bg-gray-50 rounded-lg p-4 shadow">
-              <h3 className="text-lg font-medium mb-2">Fall Prediction</h3>
-              <Line data={predictionChartData} options={predictionOptions} />
+          <div className="charts-grid">
+            <div className="chart-card">
+              <h3>Accelerometer Data (X-axis)</h3>
+              <Line data={accelerometerChartDataX} options={accelerometerOptions} />
             </div>
-            <div className="bg-gray-50 rounded-lg p-4 shadow">
-              <h3 className="text-lg font-medium mb-2">Accelerometer Data (X-axis)</h3>
-              <Line data={accelerometerChartData} options={accelerometerOptions} />
+            <div className="chart-card">
+              <h3>Accelerometer Data (Y-axis)</h3>
+              <Line data={accelerometerChartDataY} options={accelerometerOptions} />
+            </div>
+            <div className="chart-card">
+              <h3>Accelerometer Data (Z-axis)</h3>
+              <Line data={accelerometerChartDataZ} options={accelerometerOptions} />
+            </div>
+            <div className="chart-card">
+              <h3>Accelerometer Data (Pitch)</h3>
+              <Line data={accelerometerChartDataP} options={accelerometerOptions} />
             </div>
           </div>
-
+          <div className="full-width-chart">
+            <div className="chart-card">
+              <h3>Fall Prediction</h3>
+              <Line data={predictionChartData} options={predictionOptions} />
+            </div>
+          </div>
           {/* Raw Data Table */}
-          <h3 className="text-xl font-semibold mb-4">Raw Data Points</h3>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm table-auto">
+          <h3>Raw Data Points</h3>
+          <div className="table-responsive">
+            <table className="data-table">
               <thead className="bg-gray-200">
                 <tr>
                   <th className="p-2">Sno</th>

@@ -1,3 +1,109 @@
-.chart{
-    background-color: aqua;
+/* Container */
+.analytics-container {
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+  margin-top: 2rem;
+}
+
+/* Header */
+.analytics-container h2 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  color: #1f2937;  /* dark gray */
+}
+
+/* Chart Cards */
+.chart-card {
+  background-color: #f9fafb;  /* very light gray */
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: box-shadow 0.3s ease;
+}
+
+.chart-card:hover {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+}
+
+.chart-card h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #374151; /* gray-700 */
+}
+
+/* Full width and center Fall Prediction Chart */
+.full-width-chart {
+  width: 100vw; /* Full viewport width */
+  margin: 2rem auto; /* Center horizontally and give vertical margin */
+  display: flex;
+  justify-content: center; /* Center the chart inside container */
+  box-sizing: border-box;
+  padding: 0 1rem; /* Optional padding so chart doesn't stick to edges */
+}
+
+/* Adjust the chart card inside this container */
+.full-width-chart .chart-card {
+  width: 100%; /* Make sure chart-card uses full width */
+  max-width: 1200px; /* Optional max width for large screens */
+  box-shadow: none; /* Optional: remove shadow for fullscreen look */
+  border-radius: 0; /* Can remove border radius for full width */
+}
+
+/* Responsive Chart Grid */
+.charts-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+@media (min-width: 768px) {
+  .charts-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Table */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  color: #374151; /* gray-700 */
+}
+
+.data-table thead {
+  background-color: #e5e7eb; /* gray-200 */
+}
+
+.data-table th,
+.data-table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid #d1d5db;
+  text-align: left;
+}
+
+.data-table th {
+  font-weight: 600;
+  color: #111827; /* gray-900 */
+  position: sticky;
+  top: 0;
+  background: #e5e7eb;
+  z-index: 10;
+}
+
+.data-table tbody tr:hover {
+  background-color: #f3f4f6; /* gray-100 */
+  cursor: default;
+}
+
+/* Table container overflow */
+.table-responsive {
+  overflow-x: auto;
+  border-radius: 12px;
+  box-shadow: inset 0 0 8px rgba(0,0,0,0.05);
+  margin-top: 1rem;
 }
