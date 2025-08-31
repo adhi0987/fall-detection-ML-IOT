@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { ScriptableContext } from 'chart.js';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -10,9 +11,9 @@ import {
   Legend,
   BarElement,
 } from 'chart.js';
-import { Line, Bar } from 'react-chartjs-2';
+import { Line } from 'react-chartjs-2';
 
-// Register the Chart.js components
+// Register Chart.js components
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -48,6 +49,7 @@ interface DataPoint {
   prediction_label: string;
   timestamp: string;
 }
+
 interface AnalyticsProps {
   macid: string | null;
 }
@@ -58,26 +60,18 @@ const Analytics: React.FC<AnalyticsProps> = ({ macid }) => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!macid) {
-      return;
-    }
+    if (!macid) return;
 
     const fetchDataPoints = async () => {
       setLoading(true);
       setError(null);
       try {
         const response = await fetch(`https://fall-prediction-api.onrender.com/getdatapoints/${macid}`);
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
         const data = await response.json();
         setDataPoints(data);
       } catch (e: unknown) {
-        if (e instanceof Error) {
-          setError(e.message);
-        } else {
-          setError("An unknown error occurred.");
-        }
+        setError(e instanceof Error ? e.message : "An unknown error occurred.");
       } finally {
         setLoading(false);
       }
@@ -88,7 +82,7 @@ const Analytics: React.FC<AnalyticsProps> = ({ macid }) => {
   if (!macid) {
     return <div className="text-center p-8 text-gray-500">Select a device from the list to view its analytics.</div>;
   }
-  
+
   if (loading) {
     return <div className="text-center p-8">Loading analytics for {macid}...</div>;
   }
@@ -96,9 +90,10 @@ const Analytics: React.FC<AnalyticsProps> = ({ macid }) => {
   if (error) {
     return <div className="text-center p-8 text-red-500">Error: {error}</div>;
   }
-  
+
+  // ✅ Ensure prediction values are numeric
   const labels = dataPoints.map((data) => new Date(data.timestamp).toLocaleString());
-  const predictionData = dataPoints.map((data) => data.prediction);
+  const predictionData = dataPoints.map((data) => Number(data.prediction));
   const maxAxData = dataPoints.map((data) => data.max_Ax);
 
   const predictionChartData = {
@@ -107,17 +102,18 @@ const Analytics: React.FC<AnalyticsProps> = ({ macid }) => {
       {
         label: 'Fall Prediction',
         data: predictionData,
-        backgroundColor: (context: { dataIndex: any; dataset: { data: { [x: string]: any; }; }; }) => {
-            const index = context.dataIndex;
-            const value = context.dataset.data[index];
-            return value === 1 ? 'rgba(255, 99, 132, 0.5)' : 'rgba(53, 162, 235, 0.5)';
+        pointBackgroundColor: (context: ScriptableContext<'line'>) => {
+          const value = context.dataset.data[context.dataIndex] as number;
+          return value === 1 ? 'rgb(255, 99, 132)' : 'rgb(53, 162, 235)';
         },
-        borderColor: (context: { dataIndex: any; dataset: { data: { [x: string]: any; }; }; }) => {
-            const index = context.dataIndex;
-            const value = context.dataset.data[index];
-            return value === 1 ? 'rgb(255, 99, 132)' : 'rgb(53, 162, 235)';
+        pointBorderColor: (context: ScriptableContext<'line'>) => {
+          const value = context.dataset.data[context.dataIndex] as number;
+          return value === 1 ? 'rgb(255, 99, 132)' : 'rgb(53, 162, 235)';
         },
         borderWidth: 1,
+        showLine: false,   // ✅ show only points, no connecting line
+        pointRadius: 6,    // ✅ makes points visible
+        pointHoverRadius: 8,
       },
     ],
   };
@@ -130,43 +126,44 @@ const Analytics: React.FC<AnalyticsProps> = ({ macid }) => {
         data: maxAxData,
         borderColor: 'rgb(255, 99, 132)',
         backgroundColor: 'rgba(255, 99, 132, 0.5)',
-        tension: 0.1,
+        tension: 0.5,
       },
       {
         label: 'Min X-axis Acceleration',
         data: dataPoints.map((data) => data.min_Ax),
         borderColor: 'rgb(53, 162, 235)',
         backgroundColor: 'rgba(53, 162, 235, 0.5)',
-        tension: 0.1,
+        tension: 0.5,
       },
       {
         label: 'Mean X-axis Acceleration',
         data: dataPoints.map((data) => data.mean_Ax),
         borderColor: 'rgb(75, 192, 192)',
         backgroundColor: 'rgba(75, 192, 192, 0.5)',
-        tension: 0.1,
+        tension: 0.5,
       },
     ],
   };
 
-//   const predictionOptions = {
-//     responsive: true,
-//     plugins: {
-//       legend: { position: 'top' as const },
-//       title: { display: true, text: 'Fall Prediction Events' },
-//     },
-//     scales: {
-//         y: {
-//             // Set the y-axis type to 'category' to handle string labels
-//             type: 'category',
-//             labels: ['No Fall', 'Fall'],
-//             title: { display: true, text: 'Prediction' },
-//         },
-//         x: {
-//             title: { display: true, text: 'Time' },
-//         },
-//     }
-//   };
+  const predictionOptions = {
+    responsive: true,
+    plugins: {
+      legend: { position: 'top' as const },
+      title: { display: true, text: 'Fall Prediction Events' },
+    },
+    // scales: {
+    //   y: {
+    //     ticks: {
+    //       callback: (value: number) => (value === 1 ? 'Fall' : 'No Fall'), // ✅ map 0/1 → label
+    //     },
+    //     min: 0,
+    //     max: 1,
+    //     stepSize: 1,
+    //     title: { display: true, text: 'Prediction' },
+    //   },
+    //   x: { title: { display: true, text: 'Time' } },
+    // },
+  };
 
   const accelerometerOptions = {
     responsive: true,
@@ -183,13 +180,13 @@ const Analytics: React.FC<AnalyticsProps> = ({ macid }) => {
   return (
     <div className="p-8 bg-white rounded-lg shadow-md mt-8">
       <h2 className="text-xl font-semibold mb-4">Analytics for MAC: {macid}</h2>
-      
+
       {dataPoints.length > 0 ? (
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
             <div className="bg-gray-50 rounded-lg p-4 shadow">
               <h3 className="text-lg font-medium mb-2">Fall Prediction</h3>
-              <Bar data={predictionChartData}  />
+              <Line data={predictionChartData} options={predictionOptions} />
             </div>
             <div className="bg-gray-50 rounded-lg p-4 shadow">
               <h3 className="text-lg font-medium mb-2">Accelerometer Data (X-axis)</h3>
@@ -197,6 +194,7 @@ const Analytics: React.FC<AnalyticsProps> = ({ macid }) => {
             </div>
           </div>
 
+          {/* Raw Data Table */}
           <h3 className="text-xl font-semibold mb-4">Raw Data Points</h3>
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm table-auto">
@@ -257,4 +255,5 @@ const Analytics: React.FC<AnalyticsProps> = ({ macid }) => {
     </div>
   );
 };
+
 export default Analytics;
