@@ -30,9 +30,9 @@ app.add_middleware(
 
 # Load the trained model and scaler
 try:
-    with open('svm_model.pkl', 'rb') as model_file:
+    with open('new_svm_model.pkl', 'rb') as model_file:
         model = pickle.load(model_file)
-    with open('scaler.pkl', 'rb') as scaler_file:
+    with open('new_scaler.pkl', 'rb') as scaler_file:
         scaler = pickle.load(scaler_file)
     print("Model and scaler loaded successfully.")
 except FileNotFoundError:
