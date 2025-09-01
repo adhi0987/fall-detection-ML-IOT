@@ -11,6 +11,11 @@ from fastapi.middleware.cors import CORSMiddleware
 import database
 import models
 from models import FallDetection, Base
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Initialize FastAPI app
 app = FastAPI(
@@ -34,13 +39,13 @@ try:
         model = pickle.load(model_file)
     with open('new_scaler.pkl', 'rb') as scaler_file:
         scaler = pickle.load(scaler_file)
-    print("Model and scaler loaded successfully.")
+    logger.info(" Model and scaler loaded successfully.")
 except FileNotFoundError:
-    print("Error: Model or scaler file not found. Please ensure 'svm_model.pkl' and 'scaler.pkl' are in the same directory.")
+    logger.error(" Error: Model or scaler file not found. Please ensure 'new_svm_model.pkl' and 'new_scaler.pkl' are in the same directory.")
     model = None
     scaler = None
 except Exception as e:
-    print(f"Error loading model or scaler: {e}")
+    logger.error(f" Error loading model or scaler: {e}")
     model = None
     scaler = None
 
@@ -49,9 +54,9 @@ except Exception as e:
 def on_startup():
     try:
         models.Base.metadata.create_all(bind=database.engine)
-        print("Database tables created successfully.")
+        logger.info("Database tables created successfully.")
     except Exception as e:
-        print(f"Error creating database tables: {e}")
+        logger.error(f" Error creating database tables: {e}")
 
 # Define the input data structure for prediction using Pydantic
 class PredictionInput(BaseModel):
@@ -84,12 +89,15 @@ def get_db():
 # Define a root endpoint for basic testing
 @app.get("/")
 async def read_root():
+    logger.info("  Root endpoint accessed.")
     return {"message": "Welcome to the SVM Fall Detection API!"}
 
 # Define the prediction endpoint
 @app.post("/predict/")
 async def predict_fall(data: PredictionInput, db: Session = Depends(get_db)):
+    logger.info(f" Received prediction request for MAC address: {data.mac_addr}")
     if model is None or scaler is None:
+        logger.error(" Prediction failed: Model or scaler not loaded.")
         raise HTTPException(status_code=500, detail="Model or scaler not loaded. Please check server logs.")
     try:
         features = [
@@ -106,7 +114,9 @@ async def predict_fall(data: PredictionInput, db: Session = Depends(get_db)):
         ]
         input_df = pd.DataFrame([features], columns=feature_names)
         scaled_data = scaler.transform(input_df)
-        print(input_df,"\n changed to :",scaled_data)
+        
+        logger.info(f"  Input data (first 5 features): {input_df.iloc[0].values[:5]}")
+        
         prediction = model.predict(scaled_data)
         prediction_label = "Fall" if prediction[0] == 1 else "No Fall"
 
@@ -134,9 +144,12 @@ async def predict_fall(data: PredictionInput, db: Session = Depends(get_db)):
         db.add(db_fall_detection)
         db.commit()
         db.refresh(db_fall_detection)
+        
+        logger.info(f" Prediction for {data.mac_addr}: {prediction_label}. Record saved to DB with ID: {db_fall_detection.id}")
 
         return {"prediction": int(prediction[0]), "prediction_label": prediction_label, "record_id": db_fall_detection.id}
     except Exception as e:
+        logger.error(f"Prediction or database operation failed for {data.mac_addr}: {e}")
         raise HTTPException(status_code=500, detail=f"Prediction or database operation failed: {e}")
     
 # Define an endpoint to get all unique MAC addresses
@@ -145,8 +158,10 @@ def get_unique_devices(db: Session = Depends(get_db)):
     try:
         unique_macs = db.query(distinct(FallDetection.mac_addr)).all()
         mac_address_list = [mac[0] for mac in unique_macs]
+        logger.info(f"  Retrieved unique devices: {mac_address_list}")
         return {"unique_devices": mac_address_list}
     except Exception as e:
+        logger.error(f" Failed to retrieve devices: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to retrieve devices: {e}")
     
 # Define a new endpoint to get data points for a specific MAC address
@@ -155,9 +170,13 @@ def get_data_for_device(mac_address: str, db: Session = Depends(get_db)):
     try:
         records = db.query(FallDetection).filter(FallDetection.mac_addr == mac_address).all()
         if not records:
+            logger.warning(f"No records found for MAC address: {mac_address}")
             raise HTTPException(status_code=404, detail=f"No records found for MAC address: {mac_address}")
+        
+        logger.info(f" Retrieved {len(records)} records for MAC address: {mac_address}")
         return records
+    except HTTPException as e:
+        raise e
     except Exception as e:
-        if isinstance(e, HTTPException):
-            raise e
+        logger.error(f" Failed to retrieve data for device {mac_address}: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to retrieve data for device: {e}")

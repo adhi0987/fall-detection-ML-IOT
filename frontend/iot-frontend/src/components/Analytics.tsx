@@ -60,31 +60,43 @@ const Analytics: React.FC<AnalyticsProps> = ({ macid }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-useEffect(() => {
-  if (!macid) return;
-
-  let intervalId: ReturnType<typeof setInterval>;
-
-  const fetchDataPoints = async () => {
-    try {
-      const response = await fetch(`https://fall-prediction-api.onrender.com/getdatapoints/${macid}`);
-      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-      const data = await response.json();
-      setDataPoints(data);
-    } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "An unknown error occurred.");
-    } finally {
-      setLoading(false);
+  useEffect(() => {
+    if (!macid) {
+      console.log("No MAC address selected, skipping data fetch.");
+      return;
     }
-  };
 
-  setLoading(true);
-  fetchDataPoints(); // initial load
-  intervalId = setInterval(fetchDataPoints, 5000); // refresh every 5s
+    let intervalId: ReturnType<typeof setInterval>;
 
-  return () => clearInterval(intervalId); // cleanup
-}, [macid]);
+    const fetchDataPoints = async () => {
+      console.log(`Fetching data points for MAC address: ${macid}...`);
+      try {
+        const response = await fetch(`https://fall-prediction-api.onrender.com/getdatapoints/${macid}`);
+        if (!response.ok) {
+          console.error(`HTTP error! status: ${response.status} for MAC ID: ${macid}`);
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        console.log(`Successfully fetched ${data.length} data points.`);
+        setDataPoints(data);
+      } catch (e: unknown) {
+        const errorMessage = e instanceof Error ? e.message : "An unknown error occurred.";
+        console.error("Error during data fetch:", errorMessage);
+        setError(errorMessage);
+      } finally {
+        setLoading(false);
+      }
+    };
 
+    setLoading(true);
+    fetchDataPoints(); // initial load
+    intervalId = setInterval(fetchDataPoints, 5000); // refresh every 5s
+
+    return () => {
+      console.log(`Clearing interval for MAC ID: ${macid}`);
+      clearInterval(intervalId); // cleanup
+    };
+  }, [macid]);
 
   if (!macid) {
     return <div className="text-center p-8 text-gray-500">Select a device from the list to view its analytics.</div>;
@@ -97,7 +109,7 @@ useEffect(() => {
   if (error) {
     return <div className="text-center p-8 text-red-500">Error: {error}</div>;
   }
-
+  
   // Prediction and accelerometer chart data preparation
   const labels = dataPoints.map((data) => new Date(data.timestamp).toLocaleString());
   const predictionData = dataPoints.map((data) => Number(data.prediction));
@@ -116,7 +128,9 @@ useEffect(() => {
   const maxPData = dataPoints.map((data) => data.max_pitch);
   const minPData = dataPoints.map((data) => data.min_pitch);
   const meanPData = dataPoints.map((data) => data.mean_pitch);
-
+  
+  // Chart data and options remain the same
+  // ... (rest of the component)
   const predictionChartData = {
     labels,
     datasets: [
