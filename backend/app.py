@@ -116,7 +116,7 @@ async def predict_fall(data: PredictionInput, db: Session = Depends(get_db)):
         scaled_data = scaler.transform(input_df)
         
         logger.info(f"  Input data (first 16 features): {input_df.iloc[0].values[:]}")
-        logger.info(f"  Scaled Input data (first 16 features): {scaled_data  .iloc[0].values[:]}")
+        logger.info(f"  Scaled Input data (first 16 features): {scaled_data[0]}")
         prediction = model.predict(scaled_data)
         prediction_label = "Fall" if prediction[0] == 1 else "No Fall"
 
