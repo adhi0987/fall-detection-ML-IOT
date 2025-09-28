@@ -48,7 +48,7 @@ fall-detection-ML-IOT/
     ```
 3. Run the backend server:
     ```sh
-    python app.py
+    uvicorn  app:app --reload
     ```
    The backend should be available at `http://localhost:8000` or as configured.
 
@@ -96,4 +96,5 @@ fall-detection-ML-IOT/
 ## Acknowledgements
 
 - Open source IoT and ML libraries
+
 - Community

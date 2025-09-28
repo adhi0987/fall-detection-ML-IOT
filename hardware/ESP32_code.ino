@@ -52,7 +52,7 @@ void sendPredictionRequest(
   String json_payload;
   serializeJson(doc, json_payload);
 
-  Serial.println("\n📤 Sending JSON payload:");
+  Serial.println("\nSending JSON payload:");
   Serial.println(json_payload);
 
   int httpCode = http.POST(json_payload);
@@ -60,7 +60,7 @@ void sendPredictionRequest(
 
   if (httpCode > 0) {
     String payload = http.getString();
-    Serial.println("\n📥 API Response:");
+    Serial.println("\nAPI Response:");
     Serial.println(payload);
 
     StaticJsonDocument<512> response_doc;
@@ -74,19 +74,19 @@ void sendPredictionRequest(
       Serial.println(prediction_label);
 
       if (prediction_value == 1) {
-        Serial.println("⚠ Fall detected! Turning LED ON.");
+        Serial.println("Fall detected! Turning LED ON.");
         digitalWrite(LED_PIN, HIGH);
         delay(5000);
       } else {
-        Serial.println("✅ No fall detected. LED OFF.");
+        Serial.println("No fall detected. LED OFF.");
         digitalWrite(LED_PIN, LOW);
       }
     } else {
-      Serial.print("❌ JSON parse error: ");
+      Serial.print("JSON parse error: ");
       Serial.println(error.f_str());
     }
   } else {
-    Serial.printf("\n❌ HTTP POST failed, error: %s\n", http.errorToString(httpCode).c_str());
+    Serial.printf("\nHTTP POST failed, error: %s\n", http.errorToString(httpCode).c_str());
   }
   http.end();
 }
@@ -143,9 +143,9 @@ void loop() {
     sensors_event_t a, g, temp;
     mpu.getEvent(&a, &g, &temp);
 
-    Ax[i] = a.acceleration.x;
-    Ay[i] = a.acceleration.y;
-    Az[i] = a.acceleration.z;
+    Ax[i] = a.acceleration.x/9.80655;
+    Ay[i] = a.acceleration.y/9.80655;
+    Az[i] = a.acceleration.z/9.80655;
 
     // Compute pitch from accel data (approx)
     Pitch[i] = atan2(Ax[i], sqrt(Ay[i] * Ay[i] + Az[i] * Az[i])) * 180.0 / PI;
@@ -181,3 +181,4 @@ void loop() {
     maxPitch, minPitch, varPitch, meanPitch
   );
 }
+
