@@ -1,26 +1,24 @@
-import { useState } from "react";
-import Navbar from "./components/Navbar";
-import DeviceList from "./components/Devicelist";
-import Analytics from "./components/Analytics";
+import { Route, Routes } from 'react-router-dom';
+import './App.css'; // We will add styles later
+import Navbar from './components/Navbar';
+import PredictionAnalytics from './pages/PredictionAnalytics'; // We will create this next
+import Training from './pages/Training'; // We will create this next
 
-const App = () => {
-  const [macaddr, setMacAddr] = useState<string | null>(null);
-
+function App() {
   return (
-    <div className="bg-gray-100 min-h-screen font-inter">
-      <Navbar />
-      <div className="container mx-auto px-4 py-24">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="col-span-1">
-            <DeviceList set_mac_addr={setMacAddr} selectedMac={macaddr} />
-          </div>
-          <div className="col-span-1 md:col-span-2">
-            <Analytics macid={macaddr} />
-          </div>
-        </div>
-      </div>
+    <div className="app-container">
+      <Navbar /> {/* The navbar is always visible at the top */}
+      <main className="main-content">
+        {/* The Routes component decides which page to show based on the URL */}
+        <Routes>
+          {/* If the URL is '/', show the PredictionAnalytics page */}
+          <Route path="/" element={<PredictionAnalytics />} />
+          {/* If the URL is '/training', show the Training page */}
+          <Route path="/training" element={<Training />} />
+        </Routes>
+      </main>
     </div>
   );
-};
+}
 
 export default App;

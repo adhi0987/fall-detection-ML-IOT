@@ -1,12 +1,276 @@
-/* App.css */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
+/* ---
+  GLOBAL STYLESHEET for Fall Detection App
+--- */
 
-body {
-  font-family: 'Inter', sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+/* 1. Design Tokens (Variables) & Font Import
+-------------------------------------------------- */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --primary-color: #3b82f6;
+  --primary-hover: #2563eb;
+  --danger-color: #ef4444;
+  --danger-bg: #fee2e2;
+  --success-color: #22c55e;
+  --success-bg: #dcfce7;
+  
+  --bg-color: #f8fafc;
+  --surface-color: #ffffff;
+  --border-color: #e2e8f0;
+
+  --text-color-primary: #1e293b;
+  --text-color-secondary: #64748b;
+
+  --font-family: 'Inter', sans-serif;
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --border-radius: 0.5rem;
 }
 
-.table-auto th, .table-auto td {
+/* 2. Global Resets & Typography
+-------------------------------------------------- */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-family);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--bg-color);
+  color: var(--text-color-primary);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  margin: 0 0 1rem 0;
+}
+
+p {
+  line-height: 1.6;
+}
+
+/* 3. Layout Styles
+-------------------------------------------------- */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.main-content {
+  flex-grow: 1;
+  padding: 1.5rem;
+}
+
+.page-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap; /* Allows button to wrap on small screens */
+  gap: 1rem;
+}
+
+.page-title {
+  font-size: 2.25rem;
+  font-weight: 700;
+}
+
+.section-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-color-primary);
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+/* 4. Component Styles
+-------------------------------------------------- */
+
+/* --- Card/Container --- */
+.chart-container,
+.data-table-container {
+  background-color: var(--surface-color);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-md);
+  padding: 1.5rem;
+  border: 1px solid var(--border-color);
+}
+
+/* --- Buttons --- */
+.action-button {
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  border: none;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.primary-button {
+  background-color: var(--primary-color);
+  color: white;
+  box-shadow: var(--shadow-sm);
+}
+
+.primary-button:hover {
+  background-color: var(--primary-hover);
+  box-shadow: var(--shadow-md);
+}
+
+.primary-button:disabled {
+  background-color: #93c5fd; /* Lighter blue */
+  cursor: not-allowed;
+}
+
+/* --- Tables --- */
+.data-table-container {
+  overflow-x: auto; /* Ensures table is scrollable on small screens */
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.data-table th, .data-table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border-color);
   white-space: nowrap;
+}
+
+.data-table th {
+  font-weight: 600;
+  color: var(--text-color-secondary);
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+}
+
+.data-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.data-table tbody tr:hover {
+  background-color: var(--bg-color);
+}
+
+/* --- Badges/Spans --- */
+.fall, .no-fall {
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+.fall {
+  color: var(--danger-color);
+  background-color: var(--danger-bg);
+}
+
+.no-fall {
+  color: var(--success-color);
+  background-color: var(--success-bg);
+}
+
+/* --- Forms --- */
+.tag-select {
+  padding: 0.5rem;
+  border-radius: 0.375rem;
+  border: 1px solid var(--border-color);
+  background-color: #fff;
+  min-width: 120px;
+}
+
+/* --- Info/Error Messages --- */
+.info-message, .error-message {
+  padding: 1rem;
+  border-radius: var(--border-radius);
+  text-align: center;
+}
+
+.info-message {
+  background-color: #e0f2fe;
+  color: #0c4a6e;
+}
+
+.error-message {
+  background-color: var(--danger-bg);
+  color: var(--danger-color);
+}
+
+
+.navbar {
+    /* background-color: var(--primary-hover); */
+    padding: 0 1rem;
+  }
+
+  .navbar-container {
+    /* background-color: var(--primary-color); */
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .navbar {
+    background-color: var(--surface-color);
+    height: auto;
+    padding: 1rem;
+  }
+
+  .navbar-brand a {
+    font-size: 1.25rem;
+    text-decoration: none;
+  }
+
+  .navbar-links a{
+    gap: 1.5rem;
+    padding-top: 0.5rem;
+    padding-left: 1rem;
+    text-decoration: none;
+  }
+
+/* 5. Responsive Adjustments
+-------------------------------------------------- */
+@media (max-width: 768px) {
+  .main-content {
+    padding: 1rem;
+  }
+  
+  .page-title {
+    font-size: 1.75rem;
+  }
+
+  .navbar {
+    padding: 0 1rem;
+  }
+
+  .navbar-container {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .navbar {
+    height: auto;
+    padding: 1rem;
+  }
+
+  .navbar-brand a {
+    font-size: 1.25rem;
+  }
+
+  .navbar-links {
+    gap: 1.5rem;
+    padding-top: 0.5rem;
+  }
 }
