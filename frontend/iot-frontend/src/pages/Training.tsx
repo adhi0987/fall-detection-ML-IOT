@@ -172,6 +172,7 @@ interface TrainingData {
   mean_Ay: number;
   max_Az: number;
   mean_Az: number;
+  source_type?:string;
 }
 
 const Training: React.FC = () => {
@@ -266,7 +267,8 @@ const Training: React.FC = () => {
             <thead>
                 <tr>
                     <th>Record Id</th>
-                    <th>Device MAC</th>
+                    {/* <th>Device MAC</th> */}
+                    <th>Timestamp</th>
                     <th>Avg Ax</th>
                     <th>Avg Ay</th>
                     <th>Avg Az</th>
@@ -278,7 +280,8 @@ const Training: React.FC = () => {
                 <tr key={item.id}>
                   {/* <td>{new Date(item.timestamp).toLocaleString()}</td> */}
                   <td>{item.id}</td>
-                  <td>{item.mac_addr}</td>
+                  {/* <td>{item.mac_addr}</td> */}
+                  <td>{new Date(item.timestamp).toLocaleString()}</td>
                   <td>{item.mean_Ax.toFixed(2)}</td>
                   <td>{item.mean_Ay.toFixed(2)}</td>
                   <td>{item.mean_Az.toFixed(2)}</td>
@@ -305,22 +308,25 @@ const Training: React.FC = () => {
           <thead>
             <tr>
                 <th>Record Id</th>
-                <th>Device MAC</th>
+                {/* <th>Device MAC</th> */}
+                <th>timestamp</th>
                 <th>Avg Ax</th>
                 <th>Avg Ay</th>
                 <th>Avg Az</th>
+                <th>Source Type</th>
                 <th>Label</th>
             </tr>
           </thead>
           <tbody>
             {labelledData.map((item) => (
               <tr key={item.id}>
-                {/* <td>{new Date(item.timestamp).toLocaleString()}</td> */}
                 <td>{item.id}</td>
-                <td>{item.mac_addr}</td>
+                <td>{new Date(item.timestamp).toLocaleString()}</td>
+                {/* <td>{item.mac_addr}</td> */}
                 <td>{item.mean_Ax.toFixed(2)}</td>
                 <td>{item.mean_Ay.toFixed(2)}</td>
                 <td>{item.mean_Az.toFixed(2)}</td>
+                <td>{item.source_type} </td>
                 <td>
                   <span className={item.prediction === 1 ? 'fall' : 'no-fall'}>
                     {item.prediction === 1 ? 'Fall' : 'No Fall'}
