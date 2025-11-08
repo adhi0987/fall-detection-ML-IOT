@@ -1,5 +1,3 @@
-# In backend/schemas.py
-
 from pydantic import BaseModel
 from datetime import datetime
 
@@ -48,5 +46,3 @@ class FallDetection(BaseModel):
     class Config:
         # orm_mode = True
         from_attributes = True
-        # Note: If you are using Pydantic V2, orm_mode is deprecated.
-        # Use `from_attributes = True` instead.

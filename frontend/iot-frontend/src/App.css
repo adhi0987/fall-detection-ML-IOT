@@ -210,12 +210,10 @@ p {
 
 
 .navbar {
-    /* background-color: var(--primary-hover); */
     padding: 0 1rem;
   }
 
   .navbar-container {
-    /* background-color: var(--primary-color); */
     flex-direction: column;
     align-items: flex-start;
     gap: 0.5rem;

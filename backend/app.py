@@ -11,8 +11,7 @@ from contextlib import asynccontextmanager
 from typing import List
 from dotenv import load_dotenv
 import asyncio
-from datetime import datetime # <-- ADD THIS
-
+from datetime import datetime 
 import paho.mqtt.client as mqtt
 from fastapi import FastAPI, Depends, HTTPException, Query, Request, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
@@ -47,7 +46,7 @@ MQTT_CLIENT_ID = os.getenv("MQTT_CLIENT_ID") # unique id
 # Model file path
 MODEL_PIPELINE_PATH = 'fall_detection_model.joblib' # Path to  joblib file
 
-# <-- CHANGE: Define feature names as a constant for consistency ---
+# Features List
 FEATURE_NAMES = [
     'max_Ax', 'min_Ax', 'var_Ax', 'mean_Ax', 'max_Ay', 'min_Ay', 'var_Ay', 'mean_Ay',
     'max_Az', 'min_Az', 'var_Az', 'mean_Az', 'max_Gx', 'min_Gx', 'var_Gx', 'mean_Gx',
@@ -92,11 +91,7 @@ def on_mqtt_connect(client, userdata, flags, rc):
     else:
         logger.error(f"Failed to connect to MQTT Broker. Return code: {rc}")
 
-# <-- CHANGE: Custom JSON encoder to handle datetime objects
-def json_serializer(obj):
-    if isinstance(obj, datetime):
-        return obj.isoformat()
-    raise TypeError(f"Object of type {type(obj).__name__} is not JSON serializable")
+
 
 async def on_mqtt_message(client, userdata, message):
     payload_str = message.payload.decode("utf-8")
@@ -197,8 +192,14 @@ async def on_mqtt_message(client, userdata, message):
 mqtt_client.on_connect = on_mqtt_connect
 mqtt_client.on_message = lambda client, userdata, message: asyncio.run(on_mqtt_message(client, userdata, message))
 
+# ---4. Json serializer for datatime objects ---
+def json_serializer(obj):
+    if isinstance(obj, datetime):
+        return obj.isoformat()
+    raise TypeError(f"Object of type {type(obj).__name__} is not JSON serializable")
 
-# --- 4. FastAPI Lifespan Manager ---
+
+# --- 5. FastAPI Lifespan Manager ---
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("Application startup...")
@@ -233,7 +234,7 @@ async def lifespan(app: FastAPI):
     mqtt_client.disconnect()
     logger.info("MQTT client disconnected.")
 
-# --- 5. FastAPI App Initialization ---
+# --- 6. FastAPI App Initialization ---
 app = FastAPI(
     title="Fall Detection API with MQTT and Model Training",
     description="An API to handle fall detection data, predictions via MQTT, and model retraining.",
@@ -297,7 +298,7 @@ def train_model(db: Session = Depends(get_db)):
         logger.warning(f"Not enough data to train. Found {df.shape[0]} records, need at least 20.")
         raise HTTPException(status_code=400, detail="Not enough labeled data to train the model.")
 
-    # 2. <-- CHANGE: Use the global FEATURE_NAMES constant
+    # 2. Prepare features and labels
     X = df[FEATURE_NAMES]
     y = df['prediction']
     logger.info(f"Training dataset prepared with {len(y)} samples.")

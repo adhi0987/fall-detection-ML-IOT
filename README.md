@@ -4,26 +4,29 @@ A full-stack project for real-time fall detection using IoT devices and machine 
 
 ## Features
 
-- **IoT Device Integration:** Collects real-time sensor data (e.g., accelerometer, gyroscope) from multiple devices.
+- **IoT Device Integration:** Collects real-time sensor data from MPU6050 sensor
 - **Machine Learning:** Predicts falls using trained ML models.
 - **REST API:** Backend API for device management and analytics.
 - **Frontend Dashboard:** Visualizes device data and analytics.
-- **Device List:** View and select devices by MAC address.
 
 ## Project Structure
 
 ```
 fall-detection-ML-IOT/
 │
-├── backend/                # Backend API (Python/FastAPI/Flask)
+├── backend/                # Backend API (FastAPI)
 ├── frontend/               # React frontend
 │   └── iot-frontend/
 │       ├── src/
-│       │   └── components/
-│       │       └── Devicelist.tsx
+│       │   ├── components/
+│       │   │         └── Navbar.tsx
+│       │   └── pages /
+│       │             ├── PredictionAnalysis.tsx
+│       │             └── Training.tsx
 │       └── ...
-├── data/                   # Sample datasets and logs
-├── models/                 # Trained ML models
+├── hardware/                   # Hardware Code for ESP32 board
+│         └── ESP32_code.ino
+├── model_code/                 # Individual Model Training Code 
 ├── README.md
 └── ...
 ```
@@ -66,35 +69,55 @@ fall-detection-ML-IOT/
     ```sh
     npm start
     ```
-   The frontend will run at `http://localhost:3000`.
+   The frontend will run at `http://localhost:5173/`.
 
 ### Device Data
 
-- Devices send sensor data to the backend API.
+- IoT device post the data to the `datacollection` or `dataprediction` topic.
 - The frontend fetches device lists and analytics from the backend.
 
 ## Usage
 
 - Open the frontend in your browser.
-- Select a device from the device list to view analytics.
-- Monitor real-time fall detection results.
+- `Analytics`: to see the analytics or predictions from the ml model for the last 10 minutes 
+- ` Training & Labelling` : To Label the Raw Data Send from the IoT device and can to re train the model on the newly labelled data 
 
-## API Endpoints
+Below are the HTTP and WebSocket endpoints 
 
-- `GET /getdevices` — List unique device MAC addresses.
-- `GET /analytics?mac=...` — Get analytics for a specific device.
-- (Add more endpoints as needed.)
+- GET /
+  - Description: Health / welcome message.
+  - Response (200): { "message": "Welcome to the Fall Detection API!" }
 
-## Contributing
+- WebSocket /ws
+  - Description: Real-time broadcast channel for new records and predictions. Frontend connects to receive live updates.
+  - Usage: open a WS connection to ws://{host}/ws and listen for JSON messages.
 
-1. Fork the repository
-2. Create a new branch (`git checkout -b feature-branch`)
-3. Commit your changes
-4. Push to your fork and open a pull request
+- PUT /labeldata/{record_id}
+  - Description: Manually label a stored record.
+  - Path params: record_id (int)
+  - Body (application/json): { "prediction": 0 | 1 }
+  - Success (200): { "message": "Record {id} labeled successfully." }
+  - Errors: 400 if prediction not 0/1, 404 if record not found
 
+- POST /trainmodel
+  - Description: Trigger server-side retraining of the model using labelled data in the DB.
+  - Body: none (optional params not implemented)
+  - Success (200): { "message": "Model training completed successfully.", "dataset_size": <n> }
+  - Errors: 400 if not enough labelled data, 500 on training failure
+  - Notes: Trained pipeline is saved to disk and reloaded into app.state.pipeline.
 
-## Acknowledgements
+- GET /fetchdata?source_type={predicted|labelled}
+  - Description: Fetch recent records filtered by source_type.
+  - Query params: source_type (required) — "predicted" or "labelled"
+  - Response (200): JSON array of FallDetection records (see schemas for fields)
+  - Example: GET /fetchdata?source_type=predicted
 
-- Open source IoT and ML libraries
+- GET /showdataset
+  - Description: Return dataset of records that have a prediction value (0 or 1).
+  - Response (200): JSON array of FallDetection records (ordered by newest first)
 
-- Community
+MQTT topics used by the backend (for devices / edge clients)
+- datacollection — devices publish raw/label data here (backend stores as source_type="labelled")
+- dataprediction — devices publish features for immediate prediction (backend predicts, stores as source_type="predicted")
+- fallalert — backend publishes alerts here when a fall is predicted
+

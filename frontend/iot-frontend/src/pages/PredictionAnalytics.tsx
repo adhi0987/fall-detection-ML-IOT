@@ -72,7 +72,7 @@ const PredictionAnalytics: React.FC = () => {
     ws.current = new WebSocket(WEBSOCKET_URL);
 
     ws.current.onopen = () => {
-        console.log("✅ WebSocket connection established");
+        console.log(" WebSocket connection established");
     };
 
     ws.current.onmessage = (event) => {
@@ -86,7 +86,7 @@ const PredictionAnalytics: React.FC = () => {
     };
     
     ws.current.onerror = (event) => {
-        console.error("❌ WebSocket error observed:", event);
+        console.error(" WebSocket error observed:", event);
         setError("WebSocket connection error. Real-time updates may not work.");
     };
 
