@@ -51,7 +51,7 @@ const PredictionAnalytics: React.FC = () => {
         const response = await axios.get(`${API_BASE_URL}/fetchdata?source_type=predicted`);
         
         // Filter initial data to only include the last 10 minutes.
-        const tenMinutesAgo = Date.now() - 10 * 60 * 1000;
+        const tenMinutesAgo = Date.now() - 4*24*60 * 60 * 1000;
         const recentData = response.data.filter((item: PredictionData) => new Date(item.timestamp).getTime() > tenMinutesAgo);
         
         const sortedData = recentData.sort((a: PredictionData, b: PredictionData) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
